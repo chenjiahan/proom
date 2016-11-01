@@ -1,0 +1,23 @@
+{
+  "name": "proom",
+  "version": "1.0.0",
+  "description": "cache script with localStorage",
+  "main": "/lib/proom.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chenjiahan/proom.git"
+  },
+  "keywords": [
+    "cache",
+    "localStorage"
+  ],
+  "author": "neverland",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chenjiahan/proom/issues"
+  },
+  "homepage": "https://github.com/chenjiahan/proom#readme"
+}
