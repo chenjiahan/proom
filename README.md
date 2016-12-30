@@ -19,7 +19,7 @@ proom.init({
 })
 
 // multi files
-// load index before vendor
+// load vendor before index
 proom.init({
     prefix: 'project_',
     version: '1.0.1'
