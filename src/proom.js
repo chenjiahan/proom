@@ -1,89 +1,97 @@
-; (function (w, d) {
+/**
+ * proom v1.0.4
+ */
+
+;(function (w, d) {
     var ls = w.localStorage,
-        proom = {
+        self = {
             // init proom
             init: function (conf) {
-                this.prefix = conf.prefix || 'proom_';
-                this.jsPrefix = 'js_';
-                this.reload = conf.version !== this.get('version') || location.href.indexOf('cleanroom') !== -1;
-                this.store = {};
-                this.clean().set('version', conf.version);
-                return this;
+                self.prefix = conf.prefix || ''
+                self.reload = conf.version !== self.get('version') || ~location.href.indexOf('cleanroom')
+                self.store = {}
+                self.clean().set('version', conf.version)
+                return self
             },
 
             // localStorage.setItem
             set: function (key, value) {
                 if (ls) {
                     try {
-                        ls.setItem(this.prefix + key, value);
+                        ls.setItem(self.prefix + key, value)
                     } catch (e) {
-                        e.code === 22 && ls.clear();
+                        e.code === 22 && ls.clear()
                     }
                 }
             },
 
             // localStorage.getItem
             get: function (key) {
-                return ls ? ls.getItem(this.prefix + key) : '';
+                return ls ? ls.getItem(self.prefix + key) : void 0
+            },
+
+            // localStorage.removeItem
+            remove: function (key) {
+                ls && ls.removeItem(self.prefix + key)
             },
 
             // inject script
-            inject: function (name) {
-                var conf = this.store[name],
-                    script = d.createElement('script');
-                script.innerHTML = conf.code;
-                d.head.appendChild(script);
-                return this;
+            inject: function (arr) {
+                return (Array.isArray(arr) ? arr : [arr]).map(function (key) {
+                    var script = d.createElement('script')
+                    script.innerHTML = self.store[key].code
+                    d.head.appendChild(script)
+                }), self
             },
 
-            // get script by ajax
-            fetch: function (name) {
+            // fetch script by ajax
+            fetch: function (key) {
                 var xhr = new XMLHttpRequest(),
-                    conf = this.store[name],
-                    self = this;
-                xhr.open('get', conf.url);
+                    conf = self.store[key]
+                xhr.open('get', conf.url)
                 xhr.onreadystatechange = function () {
-                    if (xhr.readyState == 4 && ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304)) {
-                        conf.code = xhr.responseText;
-                        self.set(self.jsPrefix + name, xhr.responseText);
-                        conf.cb();
+                    if (xhr.readyState === 4 && ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304)) {
+                        conf.code = xhr.responseText
+                        self.set('js_' + key, conf.code)
+                        conf.onLoad(key)
                     }
-                };
-                xhr.send();
+                }
+                xhr.send()
             },
 
             // clean old version file
             clean: function () {
-                if (this.reload) {
+                if (self.reload) {
                     for (var item in ls) {
-                        item.indexOf(this.prefix) === 0 && ls.removeItem(item);
+                        !item.indexOf(self.prefix) && ls.removeItem(item)
                     }
                 }
-                return this;
+                return self
             },
 
             // load file
-            load: function (conf) {
-                var name = conf.name;
-                this.store[name] = conf;
-                if (this.reload) {
-                    this.fetch(name);
-                } else {
-                    conf.code = this.get(this.jsPrefix + name);
-                    if (conf.code) {
-                        conf.cb();
+            load: function (obj) {
+                Object.keys(obj).forEach(function (key) {
+                    var conf = obj[key]
+                    conf.onLoad = conf.onLoad || self.inject
+                    self.store[key] = conf
+                    if (self.reload) {
+                        self.fetch(key)
                     } else {
-                        this.fetch(name)
+                        conf.code = self.get('js_' + key)
+                        conf.code ? conf.onLoad(key) :self.fetch(key)
                     }
-                }
-                return this;
+                })
+                return self
             },
 
-            // check store contains target code
-            has: function (name) {
-                return this.store[name] && this.store[name].code;
+            // check if store contains target code
+            has: function (arr) {
+                return (Array.isArray(arr) ? arr : [arr]).every(function (key) {
+                    return self.store[key] && self.store[key].code
+                })
             }
-        };
+        }
 
-    w.proom = proom;
-})(window, document);
+    w.proom = self
+})(window, document)
