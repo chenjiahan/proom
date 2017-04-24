@@ -1,10 +1,12 @@
 {
   "name": "proom",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "cache script with localStorage",
-  "main": "/src/proom.js",
+  "main": "/lib/proom.js",
+  "types": "/lib/proom.d.ts",
   "scripts": {
-    "release": "npm publish"
+    "release": "npm publish",
+    "lib": "tsc -p tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -19,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/chenjiahan/proom/issues"
   },
-  "homepage": "https://github.com/chenjiahan/proom#readme"
+  "homepage": "https://github.com/chenjiahan/proom#readme",
+  "devDependencies": {
+    "typescript": "^2.2.2"
+  }
 }
